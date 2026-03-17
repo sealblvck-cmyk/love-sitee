@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Ari ❤️</title>
+
+<style>
+body{
+  margin:0;
+  background:black;
+  overflow:hidden;
+  font-family:Arial;
+}
+#title{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:80px;
+  color:#ff4da6;
+  text-shadow:0 0 10px #ff4da6,0 0 30px #ff4da6,0 0 60px #ff4da6;
+  z-index:2;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{transform:translate(-50%,-50%) scale(1)}
+  50%{transform:translate(-50%,-50%) scale(1.1)}
+  100%{transform:translate(-50%,-50%) scale(1)}
+}
+.media{
+  position:absolute;
+  width:150px;
+  border-radius:12px;
+  box-shadow:0 0 15px #ff4da6,0 0 30px #ff4da6;
+  pointer-events:none;
+  animation:fall linear forwards;
+}
+@keyframes fall{
+  0%{transform:translateY(0) rotate(0deg);}
+  100%{transform:translateY(110vh) rotate(20deg);}
+}
+.heart{
+  position:absolute;
+  color:#ff4da6;
+  pointer-events:none;
+  font-size:12px;
+}
+.text-love{
+  position:absolute;
+  color:#ff77c1;
+  font-size:16px;
+  font-weight:bold;
+  pointer-events:none;
+  text-shadow:0 0 5px #ff77c1;
+  animation:fallText linear forwards;
+}
+@keyframes fallText{
+  0%{transform:translateY(0) rotate(0deg);}
+  100%{transform:translateY(110vh) rotate(20deg);}
+}
+#qrContainer{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:150px;
+  height:150px;
+  pointer-events:auto;
+  z-index:3;
+  animation:qrPulse 2s infinite;
+}
+@keyframes qrPulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+</style>
+</head>
+<body>
+
+<div id="title">Ari ❤️</div>
+
+<audio id="music" loop>
+<source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<div id="qrContainer"></div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+let url = "https://username.github.io/love-site/index.html"; // замени на свою ссылку
+QRCode.toCanvas(document.createElement('canvas'), url, {width:150,color:{dark:'#ff4da6',light:'#0000'}}, function(err,canvas){
+  if(err){console.error(err);return;}
+  document.getElementById('qrContainer').appendChild(canvas);
+});
+</script>
+
+<script>
+// ---------------- Настройка ----------------
+let photos=[
+"photo1.jpg","photo2.jpg","photo3.jpg","photo4.jpg","photo5.jpg",
+"photo6.jpg","photo7.jpg","photo8.jpg","photo9.jpg","photo10.jpg"
+];
+let videos=[
+"video1.mp4","video2.mp4","video3.mp4","video4.mp4","video5.mp4","video6.mp4"
+];
+let phrases=[
+"Я тебя люблю","I love you","Te amo","Je t'aime","Ich liebe dich",
+"Ti amo","Eu te amo","Te iubesc","Saya cinta padamu","Saranghae",
+"사랑해요","Люблю тебя","Jeg elsker dig","Kocham cię","Aishiteru"
+ // добавь до 100 языков
+];
+let started=false;
+let photoIndex=0;
+let videoIndex=0;
+let occupiedX=[], occupiedText=[];
+
+// ---------------- Запуск ----------------
+function startLove(){
+  if(started) return;
+  started=true;
+  document.getElementById("music").play();
+  document.getElementById("title").style.opacity="0";
+  setInterval(fallingPhoto,1500);
+  setInterval(fallingVideo,2000);
+  setInterval(fallingPhrase,300);
+  setInterval(heartRain,25);
+}
+
+// ---------------- Генератор свободных координат ----------------
+function getFreePosition(width,height,occupied){
+  let attempts=0;
+  while(attempts<100){
+    let x=Math.random()*(window.innerWidth-width);
+    let y=Math.random()*(-200)-height;
+    let overlap=false;
+    for(let i=0;i<occupied.length;i++){
+      let obj=occupied[i];
+      if(x+width>obj.x && x<obj.x+obj.w && y+height>obj.y && y<obj.y+obj.h){
+        overlap=true; break;
+      }
+    }
+    if(!overlap){
+      occupied.push({x:x,y:y,w:width,h:height});
+      return {x:x,y:y};
+    }
+    attempts++;
+  }
+  return {x:Math.random()*(window.innerWidth-width), y:-height};
+}
+
+// ---------------- Падающие фото ----------------
+function fallingPhoto(){
+  let img=new Image();
+  img.src = photos[photoIndex];
+  photoIndex=(photoIndex+1)%photos.length;
+  img.className="media";
+  let pos=getFreePosition(150,150,occupiedX);
+  img.style.left=pos.x+"px";
+  img.style.top=pos.y+"px";
+  img.onload=function(){
+    document.body.appendChild(img);
+    img.style.animationDuration=(Math.random()*8+8)+"s";
+    setTimeout(()=>img.remove(),10000);
+  }
+}
+
+// ---------------- Падающие видео ----------------
+function fallingVideo(){
+  let video=document.createElement("video");
+  video.src=videos[videoIndex];
+  videoIndex=(videoIndex+1)%videos.length;
+  video.className="media";
+  let pos=getFreePosition(150,150,occupiedX);
+  video.style.left=pos.x+"px";
+  video.style.top=pos.y+"px";
+  video.autoplay=true;
+  video.loop=true;
+  video.muted=true;
+  video.playsInline=true;
+  document.body.appendChild(video);
+  video.style.animationDuration=(Math.random()*8+8)+"s";
+  setTimeout(()=>video.remove(),10000);
+}
+
+// ---------------- Падающие слова ----------------
+function fallingPhrase(){
+  let phrase=phrases[Math.floor(Math.random()*phrases.length)];
+  let span=document.createElement("div");
+  span.className="text-love";
+  span.innerText=phrase;
+  let pos=getFreePosition(120,20,occupiedText);
+  span.style.left=pos.x+"px";
+  span.style.top=pos.y+"px";
+  span.style.transform=`rotate(${Math.random()*40-20}deg)`;
+  span.style.opacity=0.7 + Math.random()*0.3;
+  document.body.appendChild(span);
+  span.style.animationDuration=(Math.random()*8+8)+"s";
+  setTimeout(()=>span.remove(),10000);
+}
+
+// ---------------- Дождь сердечек ----------------
+function heartRain(){
+  let heart=document.createElement("div");
+  heart.className="heart";
+  heart.innerHTML="❤";
+  heart.style.left=Math.random()*100+"vw";
+  heart.style.top="-20px";
+  let size=Math.random()*10+8;
+  heart.style.fontSize=size+"px";
+  document.body.appendChild(heart);
+  heart.style.animationDuration=(Math.random()*4+4)+"s";
+  setTimeout(()=>heart.remove(),8000);
+}
+
+// ---------------- Клик / свайп ----------------
+document.addEventListener("click",startLove);
+document.addEventListener("touchstart",startLove);
+
+</script>
+</body>
+</html>
